@@ -1,0 +1,20 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+# C extensions
+*.so
+predictions.pt
+# Distribution / packaging
+.Python
+env/
+exp/
+notebook/
+
+# PyTorch ckpt
+*.tar
+*.bin
+*.zip
+
+# Tensorboard
+events.out.tfevents.*

@@ -1,0 +1,6 @@
+audio_path: "./dataset/msd"
+split_path: "./model_weight_split/split/MSD_split"
+input_length: 3
+sr: 16000
+n_class: 50
+prediction_type: "multilabel"

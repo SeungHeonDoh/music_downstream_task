@@ -5,47 +5,52 @@ import torch
 from omegaconf import DictConfig
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader, Dataset
-from ..data import AudioDataset
+from ..data import MTATDataset, MSDDataset, JamendoDataset
 
 class DataPipeline(LightningDataModule):
-    def __init__(self, feature_path, labels, input_length, sr) -> None:
+    def __init__(self, dataset_type, audio_path, split_path, sr, duration, batch_size, num_workers) -> None:
         super(DataPipeline, self).__init__()
-        self.feature_path = feature_path
-        self.labels = labels
-        self.input_length = sr
+        self.audio_path = audio_path
+        self.split_path = split_path
         self.sr = sr
-        if dataset_type == "MTAT":
-            self.dataset_builder = AudioDataset
-        # elif
+        self.duration =duration
+        self.batch_size = batch_size
+        self.num_workers = num_workers
+        if dataset_type == "mtat":
+            self.dataset_builder = MTATDataset
+        elif dataset_type == "msd":
+            self.dataset_builder = MSDDataset
+        elif dataset_type == "jamendo":
+            self.dataset_builder = JamendoDataset
 
     def setup(self, stage: Optional[str] = None):
         if stage == "fit" or stage is None:
             self.train_dataset = DataPipeline.get_dataset(
                 self.dataset_builder,
-                self.feature_path,
-                self.labels,
+                self.audio_path,
+                self.split_path,
                 "TRAIN",
-                self.input_length, 
-                self.sr
+                self.sr, 
+                self.duration
             )
 
             self.val_dataset = DataPipeline.get_dataset(
                 self.dataset_builder,
-                self.feature_path,
-                self.labels,
+                self.audio_path,
+                self.split_path,
                 "VALID",
-                self.input_length, 
-                self.sr
+                self.sr, 
+                self.duration
             )
 
         if stage == "test" or stage is None:
             self.test_dataset = DataPipeline.get_dataset(
                 self.dataset_builder,
-                self.feature_path,
-                self.labels,
+                self.audio_path,
+                self.split_path,
                 "TEST",
-                self.input_length, 
-                self.sr
+                self.sr, 
+                self.duration
             )
 
     def train_dataloader(self) -> DataLoader:
@@ -76,8 +81,8 @@ class DataPipeline(LightningDataModule):
         )
 
     @classmethod
-    def get_dataset(cls, dataset_builder: Callable, feature_path, labels, split, input_length, sr) -> Dataset:
-        dataset = dataset_builder(feature_path, labels, split, input_length, sr)
+    def get_dataset(cls, dataset_builder: Callable, audio_path, split_path, split, sr, duration) -> Dataset:
+        dataset = dataset_builder(audio_path, split_path, split, sr, duration)
         return dataset
 
     @classmethod
